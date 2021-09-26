@@ -2,8 +2,11 @@
 
 import pandas as pd;
 from operacoes import TratamentoNulo, TratamentoOutlier, TratamentoEscala, TratamentoEncoder
+from interface import View
 
 class Controller:
+    def __init__(self):
+        self.view = View(self)
 
     def gravar_dataset(self):
         self.dataset.to_csv('transformed_dataset.csv', index=False)
@@ -72,7 +75,8 @@ class Controller:
         self.gravar_dataset()
         
     def main(self):
-        self.processar_dataset()
+        #self.processar_dataset()
+        self.view.main()
 
 if __name__ == '__main__':
     program = Controller()
