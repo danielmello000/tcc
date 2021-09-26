@@ -2,17 +2,16 @@
 
 import pandas as pd;
 from operacoes import TratamentoNulo, TratamentoOutlier, TratamentoEscala, TratamentoEncoder
-from interface import View
+from interface import Interface
 
 class Controller:
     def __init__(self):
-        self.view = View(self)
+        self.view = Interface(self)
 
     def gravar_dataset(self):
         self.dataset.to_csv('transformed_dataset.csv', index=False)
     
     def processar_dataset(self):
-        colunas_deletar = []
         tratar_nulos = True        # necessário para todas as outras operações
         tratar_outliers = True     
         transformar_categoricos = True   # necessário para o escalonamento
@@ -30,7 +29,7 @@ class Controller:
         dataset = pd.read_csv('MOCK_DATA_sem_nome_null.csv')
         
         # dropando colunas
-        dataset.drop(colunas_deletar, axis=1, inplace = True)
+        dataset.drop(dataset.columns[self.view.index_colunas_deletar], axis=1, inplace = True)
         
         # dropando registros que estão completamente vazios
         dataset.dropna(how = 'all', inplace = True)
@@ -73,6 +72,26 @@ class Controller:
         print(dataset)
         self.dataset = dataset
         self.gravar_dataset()
+        
+    def receber_dataset(self, filename):
+        if filename:
+            self.filename = filename
+            file_extension = filename.split('.').pop()
+            
+            if file_extension == 'csv':
+                self.dataset = pd.read_csv(filename)
+            elif file_extension == 'xlsx':
+                self.dataset = pd.read_excel(filename)
+            else:
+                self.view.exibir_log('Formato de arquivo inválido!')
+                self.dataset = None
+                
+            if self.dataset is not None:
+                self.view.columns_dataset = self.dataset.columns.values
+            else:
+                self.view.columns_dataset = []
+                
+            self.view.index_colunas_deletar = []
         
     def main(self):
         #self.processar_dataset()

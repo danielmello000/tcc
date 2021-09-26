@@ -6,7 +6,7 @@ from tkinter import filedialog, Text
 from tkinter import scrolledtext
 from ttkbootstrap import Style
 
-class Interface:
+class InterfaceTeste:
     
     def __init__(self, controller):
         self.controller = controller
