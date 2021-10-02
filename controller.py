@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 import pandas as pd;
 from operacoes import TratamentoNulo, TratamentoOutlier, TratamentoEscala, TratamentoEncoder
 from interface import Interface
@@ -9,12 +10,22 @@ class Controller:
         self.view = Interface(self)
 
     def gravar_dataset(self):
-        self.dataset.to_csv('transformed_dataset.csv', index=False)
-    
+        file_extension = self.filename.split('.').pop()
+            
+        if file_extension == 'csv':
+            self.dataset.to_csv('processed_dataset.csv', index=False)
+        elif file_extension == 'xlsx':
+            self.dataset.to_excel('processed_dataset.xlsx', index=False)
+            
+        self.enviar_log('Arquivo salvo em ' + os.getcwd() + '/processed_dataset.' + file_extension)
+            
+    def enviar_log(self, msg):
+        self.view.exibir_log(msg)
+
     def processar_dataset(self):
         tratar_nulos = True        # necessário para todas as outras operações
         tratar_outliers = True     
-        transformar_categoricos = True   # necessário para o escalonamento
+        transformar_categoricos = False   # necessário para o escalonamento
         escalonar = False
         
         # instanciando os objetos das operações
@@ -24,53 +35,48 @@ class Controller:
         encoder = TratamentoEncoder()
         tratamento_escala = TratamentoEscala()
         
-        # lendo o dataset
-        #dataset = pd.read_csv('MOCK_DATA.csv')
-        dataset = pd.read_csv('MOCK_DATA_sem_nome_null.csv')
-        
         # dropando colunas
-        dataset.drop(dataset.columns[self.view.index_colunas_deletar], axis=1, inplace = True)
+        self.dataset.drop(self.dataset.columns[self.view.index_colunas_deletar], axis=1, inplace = True)
         
         # dropando registros que estão completamente vazios
-        dataset.dropna(how = 'all', inplace = True)
-        print(dataset)
+        self.dataset.dropna(how = 'all', inplace = True)
+        print(self.dataset)
         
         # pegando os nomes das colunas categóricas e numéricas
-        datatype = dataset.dtypes
+        datatype = self.dataset.dtypes
         cat_columns = datatype[(datatype == 'object') | (datatype == 'category')].index.tolist()
         other_columns = datatype[(datatype != 'object') & (datatype != 'category')].index.tolist()
         
         # dividindo o dataframe entre features categóricas e numericas
-        df_cat = dataset[cat_columns]
-        df_others = dataset[other_columns]
+        df_cat = self.dataset[cat_columns]
+        df_others = self.dataset[other_columns]
         
         # preenchendo os nulos da parte categórica com a moda
         df_cat = df_cat.fillna(df_cat.mode().iloc[0])
         
         # juntando o dataframe com as duas partes
-        dataset = pd.concat([df_cat, df_others], axis=1)
+        self.dataset = pd.concat([df_cat, df_others], axis=1)
     
         # transformando os valores categóricos em numéricos
-        dataset = encoder.executar_operacao(dataset);
+        self.dataset = encoder.executar_operacao(self.dataset);
         
         # imputando os valores nulos com o knn imputer
-        dataset = null_imputer.executar_operacao(dataset);
+        self.dataset = null_imputer.executar_operacao(self.dataset);
         
         # detectando outliers
         if tratar_outliers:
-            dataset = delete_outliers.executar_operacao(dataset, encoder.ohe_cat_columns, encoder.other_columns);
+            self.dataset = delete_outliers.executar_operacao(self.dataset, encoder.ohe_cat_columns, encoder.other_columns);
         
         #revertendo o one hot encoder caso necessário
         if not transformar_categoricos:
-            dataset = encoder.desfazer_operacao(dataset)
+            self.dataset = encoder.desfazer_operacao(self.dataset)
         
         # normalização (escala de 0 a 1)
         if escalonar:
-            dataset = tratamento_escala.executar_operacao(dataset)
+            self.dataset = tratamento_escala.executar_operacao(self.dataset)
         
         print('---------- resultado final ---------------')
-        print(dataset)
-        self.dataset = dataset
+        print(self.dataset)
         self.gravar_dataset()
         
     def receber_dataset(self, filename):
@@ -83,11 +89,13 @@ class Controller:
             elif file_extension == 'xlsx':
                 self.dataset = pd.read_excel(filename)
             else:
-                self.view.exibir_log('Formato de arquivo inválido!')
+                self.enviar_log('Formato de arquivo inválido!')
                 self.dataset = None
                 
             if self.dataset is not None:
                 self.view.columns_dataset = self.dataset.columns.values
+                self.enviar_log('Arquivo ' + filename + ' carregado com sucesso.')
+                self.view.habilitar_opcoes_tratamento()
             else:
                 self.view.columns_dataset = []
                 

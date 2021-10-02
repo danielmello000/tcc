@@ -22,11 +22,6 @@ class Interface(tkinter.Tk):
         self.form.configure(padding=(20, 10))
         self.form.columnconfigure(1, weight=1)
         self.form.rowconfigure(8, weight=1)
-
-        # form variables
-        self.name = tkinter.StringVar(value='', name='name')
-        self.address = tkinter.StringVar(value='', name='address')
-        self.phone = tkinter.StringVar(value='', name='phone')
         
         self.preencher_nulo = tkinter.IntVar(value=1, name='preencher_nulo')
         self.tratar_outliers = tkinter.IntVar(value=0, name='tratar_outliers')
@@ -37,15 +32,14 @@ class Interface(tkinter.Tk):
         ttk.Label(self.form, text='Opções de tratamento').grid(row=0,column=0, pady=10)
         
         
-
-        # create label/entry rows
-        #for i, label in enumerate(['name', 'address', 'phone']):
-        #    ttk.Label(self, text=label.title()).grid(row=i + 1, column=0, sticky='ew', pady=10, padx=(0, 10))
-        #   ttk.Entry(self, textvariable=label).grid(row=i + 1, column=1, columnspan=2, sticky='ew')
-        ttk.Checkbutton(self.form, text="Preencher valores nulos", variable=self.preencher_nulo).grid(row=1, column=0, sticky='ew', pady=(10, 5), padx=(0, 10))
-        ttk.Checkbutton(self.form, text="Tratar outliers", variable=self.tratar_outliers).grid(row=2, column=0, sticky='ew', pady=5, padx=(0, 10))
-        ttk.Checkbutton(self.form, text="Converter atributos categóricos", variable=self.tratar_categoricos).grid(row=3, column=0, sticky='ew', pady=5, padx=(0, 10))
-        ttk.Checkbutton(self.form, text="Escalonar atributos", variable=self.escalonar).grid(row=4, column=0, sticky='ew', pady=(5, 10), padx=(0, 10))
+        self.checkbox_nulos = ttk.Checkbutton(self.form, text="Preencher valores nulos", variable=self.preencher_nulo)
+        self.checkbox_nulos.grid(row=1, column=0, sticky='ew', pady=(10, 5), padx=(0, 10))
+        self.checkbox_outliers = ttk.Checkbutton(self.form, text="Tratar outliers", variable=self.tratar_outliers)
+        self.checkbox_outliers.grid(row=2, column=0, sticky='ew', pady=5, padx=(0, 10))
+        self.checkbox_encoder = ttk.Checkbutton(self.form, text="Converter atributos categóricos", variable=self.tratar_categoricos)
+        self.checkbox_encoder.grid(row=3, column=0, sticky='ew', pady=5, padx=(0, 10))
+        self.checkbox_escalonar = ttk.Checkbutton(self.form, text="Escalonar atributos", variable=self.escalonar)
+        self.checkbox_escalonar.grid(row=4, column=0, sticky='ew', pady=(5, 10), padx=(0, 10))
 
         self.button_excluir_features = ttk.Button(self.form, text='Selecionar features a excluir', style='info.TButton', command=self.montar_checkbox_colunas)
         self.button_excluir_features.grid(row=5, column=0, sticky='ew', pady=10, padx=(0, 10))
@@ -56,7 +50,7 @@ class Interface(tkinter.Tk):
         self.button_analisar = ttk.Button(self.form, text='Analisar', style='info.TButton', command=self.print_form_data)
         self.button_analisar.grid(row=6, column=2, sticky='ew', pady=10, padx=(0, 10))
         
-        self.button_processar = ttk.Button(self.form, text='Processar', style='info.TButton', command=self.print_form_data)
+        self.button_processar = ttk.Button(self.form, text='Processar', style='info.TButton', command=self.controller.processar_dataset)
         self.button_processar.grid(row=6, column=3, sticky='ew', pady=10, padx=(0, 10))
         
         ttk.Label(self.form, text='Saída').grid(row=7,column=0, pady=(10,5))
@@ -66,14 +60,12 @@ class Interface(tkinter.Tk):
         self.button_limpar = ttk.Button(self.form, text='Limpar', style='info.TButton', command=self.print_form_data)
         self.button_limpar.grid(row=9, column=2, sticky='ew', pady=10, padx=(0, 10))
         
-        self.button_processar = ttk.Button(self.form, text='Salvar como...', style='info.TButton', command=self.print_form_data)
-        self.button_processar.grid(row=9, column=3, sticky='ew', pady=10, padx=(0, 10))
-
-        # cancel button
-        #self.cancel = ttk.Button(self, text='Cancel', style='danger.TButton', command=self.quit)
-        #self.cancel.grid(row=6, column=1, sticky='ew')
+        self.gravar_log = ttk.Button(self.form, text='Salvar como...', style='info.TButton', command=self.print_form_data)
+        self.gravar_log.grid(row=9, column=3, sticky='ew', pady=10, padx=(0, 10))
         
         self.form.pack(fill='both', expand='yes')
+        
+        self.desabilitar_opcoes_tratamento()
         
     def main(self):
         self.mainloop()
@@ -94,11 +86,10 @@ class Interface(tkinter.Tk):
     def exibir_log(self, texto):
         self.log_box.configure(state ='normal')
         self.log_box.insert(tkinter.INSERT, texto)
+        self.log_box.insert(tkinter.INSERT, '\n')
         self.log_box.configure(state ='disabled')    
         
     def montar_checkbox_colunas(self):
-        #CheckboxWindow()
-        #InterfaceTeste(self.controller)
         self.checkbox_window = tkinter.Toplevel(self)
         self.checkbox_window.title("Selecionar Features")
         form = ttk.Frame(self.checkbox_window)
@@ -127,6 +118,23 @@ class Interface(tkinter.Tk):
         self.index_colunas_deletar = self.list_box.curselection()
         self.checkbox_window.destroy()
         
+    def desabilitar_opcoes_tratamento(self):
+        self.checkbox_nulos.configure(state ='disabled')
+        self.checkbox_outliers.configure(state ='disabled')
+        self.checkbox_encoder.configure(state ='disabled')
+        self.checkbox_escalonar.configure(state ='disabled')
+        self.button_excluir_features.configure(state ='disabled')
+        self.button_analisar.configure(state ='disabled')
+        self.button_processar.configure(state ='disabled')
+    
+    def habilitar_opcoes_tratamento(self):
+        self.checkbox_nulos.configure(state ='normal')
+        self.checkbox_outliers.configure(state ='normal')
+        self.checkbox_encoder.configure(state ='normal')
+        self.checkbox_escalonar.configure(state ='normal')
+        self.button_excluir_features.configure(state ='normal')
+        self.button_analisar.configure(state ='normal')
+        self.button_processar.configure(state ='normal')
 
     def print_form_data(self):
         pass
