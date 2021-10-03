@@ -11,13 +11,13 @@ class Controller:
 
     def gravar_dataset(self):
         file_extension = self.filename.split('.').pop()
-            
+        
         if file_extension == 'csv':
             self.dataset.to_csv('processed_dataset.csv', index=False)
         elif file_extension == 'xlsx':
             self.dataset.to_excel('processed_dataset.xlsx', index=False)
             
-        self.enviar_log('Arquivo salvo em ' + os.getcwd() + '/processed_dataset.' + file_extension)
+        self.enviar_log('Arquivo salvo em ' + os.getcwd() + '\processed_dataset.' + file_extension)
             
     def enviar_log(self, msg):
         self.view.exibir_log(msg)
@@ -38,9 +38,11 @@ class Controller:
         # dropando colunas
         self.dataset.drop(self.dataset.columns[self.view.index_colunas_deletar], axis=1, inplace = True)
         
+        # dropando colunas completamente vazias
+        self.dataset.dropna(how='all', axis=1, inplace=True)
+        
         # dropando registros que estão completamente vazios
         self.dataset.dropna(how = 'all', inplace = True)
-        print(self.dataset)
         
         # pegando os nomes das colunas categóricas e numéricas
         datatype = self.dataset.dtypes
@@ -53,16 +55,16 @@ class Controller:
         
         # preenchendo os nulos da parte categórica com a moda
         df_cat = df_cat.fillna(df_cat.mode().iloc[0])
-        
+         
         # juntando o dataframe com as duas partes
-        self.dataset = pd.concat([df_cat, df_others], axis=1)
-    
+        self.dataset = pd.concat([df_cat, df_others], axis=1)       
+
         # transformando os valores categóricos em numéricos
         self.dataset = encoder.executar_operacao(self.dataset);
         
         # imputando os valores nulos com o knn imputer
         self.dataset = null_imputer.executar_operacao(self.dataset);
-        
+                
         # detectando outliers
         if tratar_outliers:
             self.dataset = delete_outliers.executar_operacao(self.dataset, encoder.ohe_cat_columns, encoder.other_columns);
@@ -102,7 +104,6 @@ class Controller:
             self.view.index_colunas_deletar = []
         
     def main(self):
-        #self.processar_dataset()
         self.view.main()
 
 if __name__ == '__main__':

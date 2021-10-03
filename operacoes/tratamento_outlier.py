@@ -39,24 +39,25 @@ class TratamentoOutlier:
     
     def executar_operacao(self, dataset, ohe_cat_columns, other_columns):
         
-        # dividindo o dataframe entre features categóricas e numericas
-        df_cat = dataset[ohe_cat_columns]
-        df_others = dataset[other_columns]
-        
-        detector = KNN()
-        detector.fit(df_others)
-        
-        previsoes = detector.labels_
-        print('-- previsões outliers ---')
-        print(previsoes)
-        #print(detector.decision_scores_)
-        #print(dataset)
-        
-        # pega os indices dos outliers
-        indexes_outliers = [i for i,x in enumerate(previsoes) if x == 1]
-        print("Índices dos registros identificados como outliers: ")
-        print(indexes_outliers)
-        
-        # dropa os outliers
-        dataset.drop(indexes_outliers, inplace = True)
+        if other_columns:
+            # dividindo o dataframe entre features categóricas e numericas
+            df_cat = dataset[ohe_cat_columns]
+            df_others = dataset[other_columns]
+            
+            detector = KNN()
+            detector.fit(df_others)
+            
+            previsoes = detector.labels_
+            print('-- previsões outliers ---')
+            print(previsoes)
+            #print(detector.decision_scores_)
+            #print(dataset)
+            
+            # pega os indices dos outliers
+            indexes_outliers = [i for i,x in enumerate(previsoes) if x == 1]
+            print("Índices dos registros identificados como outliers: ")
+            print(indexes_outliers)
+            
+            # dropa os outliers
+            dataset.drop(indexes_outliers, inplace = True)
         return dataset

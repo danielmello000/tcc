@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import os
 import tkinter
 from tkinter import ttk, scrolledtext, filedialog
-
 from ttkbootstrap import Style
-from interface_teste import InterfaceTeste
 
 class Interface(tkinter.Tk):
 
@@ -28,15 +27,15 @@ class Interface(tkinter.Tk):
         self.tratar_categoricos = tkinter.IntVar(value=0, name='tratar_categoricos')
         self.escalonar = tkinter.IntVar(value=0, name='escalonar')
 
-        # form headers
         ttk.Label(self.form, text='Opções de tratamento').grid(row=0,column=0, pady=10)
         
-        
-        self.checkbox_nulos = ttk.Checkbutton(self.form, text="Preencher valores nulos", variable=self.preencher_nulo)
+        self.checkbox_nulos = ttk.Checkbutton(self.form, text="Preencher valores nulos", variable=self.preencher_nulo, 
+                                              command=self.validar_opcoes_tratamento)
         self.checkbox_nulos.grid(row=1, column=0, sticky='ew', pady=(10, 5), padx=(0, 10))
         self.checkbox_outliers = ttk.Checkbutton(self.form, text="Tratar outliers", variable=self.tratar_outliers)
         self.checkbox_outliers.grid(row=2, column=0, sticky='ew', pady=5, padx=(0, 10))
-        self.checkbox_encoder = ttk.Checkbutton(self.form, text="Converter atributos categóricos", variable=self.tratar_categoricos)
+        self.checkbox_encoder = ttk.Checkbutton(self.form, text="Converter atributos categóricos", variable=self.tratar_categoricos, 
+                                                command=self.validar_opcoes_tratamento)
         self.checkbox_encoder.grid(row=3, column=0, sticky='ew', pady=5, padx=(0, 10))
         self.checkbox_escalonar = ttk.Checkbutton(self.form, text="Escalonar atributos", variable=self.escalonar)
         self.checkbox_escalonar.grid(row=4, column=0, sticky='ew', pady=(5, 10), padx=(0, 10))
@@ -57,10 +56,10 @@ class Interface(tkinter.Tk):
         self.log_box = scrolledtext.ScrolledText(self.form, width=100, height=10, state='disabled')
         self.log_box.grid(row=8, columnspan=4, sticky='n, s, e, w', pady=10, padx=(0, 10))
         
-        self.button_limpar = ttk.Button(self.form, text='Limpar', style='info.TButton', command=self.print_form_data)
+        self.button_limpar = ttk.Button(self.form, text='Limpar', style='info.TButton', command=self.limpar_log)
         self.button_limpar.grid(row=9, column=2, sticky='ew', pady=10, padx=(0, 10))
         
-        self.gravar_log = ttk.Button(self.form, text='Salvar como...', style='info.TButton', command=self.print_form_data)
+        self.gravar_log = ttk.Button(self.form, text='Salvar como...', style='info.TButton', command=self.gravar_log)
         self.gravar_log.grid(row=9, column=3, sticky='ew', pady=10, padx=(0, 10))
         
         self.form.pack(fill='both', expand='yes')
@@ -87,6 +86,11 @@ class Interface(tkinter.Tk):
         self.log_box.configure(state ='normal')
         self.log_box.insert(tkinter.INSERT, texto)
         self.log_box.insert(tkinter.INSERT, '\n')
+        self.log_box.configure(state ='disabled')
+        
+    def limpar_log(self):
+        self.log_box.configure(state ='normal')
+        self.log_box.delete('1.0', tkinter.END)
         self.log_box.configure(state ='disabled')    
         
     def montar_checkbox_colunas(self):
@@ -115,26 +119,57 @@ class Interface(tkinter.Tk):
         form.pack(fill='both', expand='yes')
 
     def selecionar_colunas_excluir(self):
-        self.index_colunas_deletar = self.list_box.curselection()
+        self.index_colunas_deletar = list(self.list_box.curselection())
+        print(self.index_colunas_deletar)
+        self.validar_opcoes_tratamento()
         self.checkbox_window.destroy()
         
     def desabilitar_opcoes_tratamento(self):
-        self.checkbox_nulos.configure(state ='disabled')
-        self.checkbox_outliers.configure(state ='disabled')
-        self.checkbox_encoder.configure(state ='disabled')
-        self.checkbox_escalonar.configure(state ='disabled')
-        self.button_excluir_features.configure(state ='disabled')
-        self.button_analisar.configure(state ='disabled')
-        self.button_processar.configure(state ='disabled')
+        self.checkbox_nulos.configure(state = tkinter.DISABLED)
+        self.checkbox_outliers.configure(state = tkinter.DISABLED)
+        self.checkbox_encoder.configure(state = tkinter.DISABLED)
+        self.checkbox_escalonar.configure(state = tkinter.DISABLED)
+        self.button_excluir_features.configure(state = tkinter.DISABLED)
+        self.button_analisar.configure(state = tkinter.DISABLED)
+        self.button_processar.configure(state = tkinter.DISABLED)
     
     def habilitar_opcoes_tratamento(self):
-        self.checkbox_nulos.configure(state ='normal')
-        self.checkbox_outliers.configure(state ='normal')
-        self.checkbox_encoder.configure(state ='normal')
-        self.checkbox_escalonar.configure(state ='normal')
-        self.button_excluir_features.configure(state ='normal')
-        self.button_analisar.configure(state ='normal')
-        self.button_processar.configure(state ='normal')
+        self.checkbox_nulos.configure(state = tkinter.NORMAL)
+        self.checkbox_outliers.configure(state = tkinter.NORMAL)
+        self.checkbox_encoder.configure(state = tkinter.NORMAL)
+        self.button_excluir_features.configure(state = tkinter.NORMAL)
+        self.button_analisar.configure(state = tkinter.NORMAL)
+        self.button_processar.configure(state = tkinter.NORMAL)
+        
+    def validar_opcoes_tratamento(self):
+        if self.preencher_nulo.get() == 0:
+            self.tratar_outliers.set(0)
+            self.checkbox_outliers.configure(state = tkinter.DISABLED)
+            self.tratar_categoricos.set(0)
+            self.checkbox_encoder.configure(state = tkinter.DISABLED)
+            self.escalonar.set(0)
+            self.checkbox_escalonar.configure(state = tkinter.DISABLED)
+            
+            if not self.index_colunas_deletar:
+                self.button_processar.configure(state = tkinter.DISABLED)
+            else:
+                self.button_processar.configure(state = tkinter.NORMAL)
+        else:
+            self.checkbox_outliers.configure(state = tkinter.NORMAL)
+            self.checkbox_encoder.configure(state = tkinter.NORMAL)
+            self.button_processar.configure(state = tkinter.NORMAL)
+            
+            if self.tratar_categoricos.get() == 0:
+                self.escalonar.set(0)
+                self.checkbox_escalonar.configure(state = tkinter.DISABLED)
+            else:
+                self.checkbox_escalonar.configure(state = tkinter.NORMAL)
+                
+    def gravar_log(self):
+        f = open("log.txt", "w")
+        f.write(self.log_box.get("1.0", tkinter.END))
+        f.close()
+        self.exibir_log('Log salvo em ' + os.getcwd() + '\log.txt')
 
     def print_form_data(self):
         pass

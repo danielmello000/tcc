@@ -1,0 +1,14 @@
+genero,idade,cargo,salario
+,,,
+Male,23,dev junior,2000
+Male,,dev junior,2000
+Male,22,dev junior,2000
+,22,dev trainee,900
+Female,29,dev senior,10000
+Male,32,dev senior,10000
+Male,32,dev senior,10000
+Male,28,dev senior,10000
+Male,25,dev pleno,3500
+Male,29,dev pleno,3500
+Female,28,dev pleno,3500
+Female,29,dev pleno,3500000
