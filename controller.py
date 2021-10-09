@@ -22,11 +22,7 @@ class Controller:
     def enviar_log(self, msg):
         self.view.exibir_log(msg)
 
-    def processar_dataset(self):
-        tratar_nulos = True        # necessário para todas as outras operações
-        tratar_outliers = True     
-        transformar_categoricos = False   # necessário para o escalonamento
-        escalonar = False
+    def processar_dataset(self, tratar_nulos, tratar_outliers, transformar_categoricos, escalonar):
         
         # instanciando os objetos das operações
         
@@ -81,6 +77,8 @@ class Controller:
         print(self.dataset)
         self.gravar_dataset()
         
+        self.dataset = self.original_dataset
+        
     def receber_dataset(self, filename):
         if filename:
             self.filename = filename
@@ -93,6 +91,8 @@ class Controller:
             else:
                 self.enviar_log('Formato de arquivo inválido!')
                 self.dataset = None
+                
+            self.original_dataset = self.dataset
                 
             if self.dataset is not None:
                 self.view.columns_dataset = self.dataset.columns.values

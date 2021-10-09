@@ -49,7 +49,7 @@ class Interface(tkinter.Tk):
         self.button_analisar = ttk.Button(self.form, text='Analisar', style='info.TButton', command=self.print_form_data)
         self.button_analisar.grid(row=6, column=2, sticky='ew', pady=10, padx=(0, 10))
         
-        self.button_processar = ttk.Button(self.form, text='Processar', style='info.TButton', command=self.controller.processar_dataset)
+        self.button_processar = ttk.Button(self.form, text='Processar', style='info.TButton', command=self.processar)
         self.button_processar.grid(row=6, column=3, sticky='ew', pady=10, padx=(0, 10))
         
         ttk.Label(self.form, text='Saída').grid(row=7,column=0, pady=(10,5))
@@ -80,18 +80,21 @@ class Interface(tkinter.Tk):
             self.controller.receber_dataset(self.filename)
         
     def processar(self):
-        self.controller.processar_dataset()
+        self.controller.processar_dataset(self.preencher_nulo.get(), 
+                                          self.tratar_outliers.get(), 
+                                          self.tratar_categoricos.get(),
+                                          self.escalonar.get())
         
     def exibir_log(self, texto):
-        self.log_box.configure(state ='normal')
+        self.log_box.configure(state = tkinter.NORMAL)
         self.log_box.insert(tkinter.INSERT, texto)
         self.log_box.insert(tkinter.INSERT, '\n')
-        self.log_box.configure(state ='disabled')
+        self.log_box.configure(state = tkinter.DISABLED)
         
     def limpar_log(self):
-        self.log_box.configure(state ='normal')
+        self.log_box.configure(state = tkinter.NORMAL)
         self.log_box.delete('1.0', tkinter.END)
-        self.log_box.configure(state ='disabled')    
+        self.log_box.configure(state = tkinter.DISABLED)    
         
     def montar_checkbox_colunas(self):
         self.checkbox_window = tkinter.Toplevel(self)
