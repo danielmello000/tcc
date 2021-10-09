@@ -15,6 +15,9 @@ class Interface(tkinter.Tk):
         self.montar_interface()
         self.columns_dataset = []
         self.index_colunas_deletar = []
+    
+    def main(self):
+        self.mainloop()
         
     def montar_interface(self):
         self.form = ttk.Frame(self)
@@ -46,7 +49,7 @@ class Interface(tkinter.Tk):
         self.button_procurar_dataset = ttk.Button(self.form, text='Procurar dataset...', style='info.TButton', command=self.procurar_dataset)
         self.button_procurar_dataset.grid(row=6, column=0, sticky='ew', pady=10, padx=(0, 10))
         
-        self.button_analisar = ttk.Button(self.form, text='Analisar', style='info.TButton', command=self.print_form_data)
+        self.button_analisar = ttk.Button(self.form, text='Analisar', style='info.TButton', command=self.analisar)
         self.button_analisar.grid(row=6, column=2, sticky='ew', pady=10, padx=(0, 10))
         
         self.button_processar = ttk.Button(self.form, text='Processar', style='info.TButton', command=self.processar)
@@ -65,36 +68,6 @@ class Interface(tkinter.Tk):
         self.form.pack(fill='both', expand='yes')
         
         self.desabilitar_opcoes_tratamento()
-        
-    def main(self):
-        self.mainloop()
-        
-    def procurar_dataset(self):
-        self.filename = filedialog.askopenfilename(initialdir = "/",
-                                          title = "Selecione o arquivo",
-                                          filetypes = (("Formatos aceitos",
-                                                        ".csv .xlsx"),
-                                                       ("all files",
-                                                        "*.*")))
-        if(self.filename):
-            self.controller.receber_dataset(self.filename)
-        
-    def processar(self):
-        self.controller.processar_dataset(self.preencher_nulo.get(), 
-                                          self.tratar_outliers.get(), 
-                                          self.tratar_categoricos.get(),
-                                          self.escalonar.get())
-        
-    def exibir_log(self, texto):
-        self.log_box.configure(state = tkinter.NORMAL)
-        self.log_box.insert(tkinter.INSERT, texto)
-        self.log_box.insert(tkinter.INSERT, '\n')
-        self.log_box.configure(state = tkinter.DISABLED)
-        
-    def limpar_log(self):
-        self.log_box.configure(state = tkinter.NORMAL)
-        self.log_box.delete('1.0', tkinter.END)
-        self.log_box.configure(state = tkinter.DISABLED)    
         
     def montar_checkbox_colunas(self):
         self.checkbox_window = tkinter.Toplevel(self)
@@ -120,7 +93,17 @@ class Interface(tkinter.Tk):
         button_cancelar.grid(row=1, column=2, sticky='ew', pady=10, padx=(0, 10))
         
         form.pack(fill='both', expand='yes')
-
+        
+    def procurar_dataset(self):
+        self.filename = filedialog.askopenfilename(initialdir = "/",
+                                          title = "Selecione o arquivo",
+                                          filetypes = (("Formatos aceitos",
+                                                        ".csv .xlsx"),
+                                                       ("all files",
+                                                        "*.*")))
+        if(self.filename):
+            self.controller.receber_dataset(self.filename)
+            
     def selecionar_colunas_excluir(self):
         self.index_colunas_deletar = list(self.list_box.curselection())
         print(self.index_colunas_deletar)
@@ -162,12 +145,45 @@ class Interface(tkinter.Tk):
                 self.checkbox_escalonar.configure(state = tkinter.DISABLED)
             else:
                 self.checkbox_escalonar.configure(state = tkinter.NORMAL)
+    
+    def analisar(self):
+        self.button_excluir_features.configure(state = tkinter.DISABLED)
+        self.button_analisar.configure(state = tkinter.DISABLED)
+        self.button_processar.configure(state = tkinter.DISABLED)
+        
+        self.controller.analisar_dataset()
+        
+        self.button_excluir_features.configure(state = tkinter.NORMAL)
+        self.button_analisar.configure(state = tkinter.NORMAL)
+        self.button_processar.configure(state = tkinter.NORMAL)
+        
+    def processar(self):
+        self.button_excluir_features.configure(state = tkinter.DISABLED)
+        self.button_analisar.configure(state = tkinter.DISABLED)
+        self.button_processar.configure(state = tkinter.DISABLED)
+        
+        self.controller.processar_dataset(self.preencher_nulo.get(), 
+                                          self.tratar_outliers.get(), 
+                                          self.tratar_categoricos.get(),
+                                          self.escalonar.get())
+        
+        self.button_excluir_features.configure(state = tkinter.NORMAL)
+        self.button_analisar.configure(state = tkinter.NORMAL)
+        self.button_processar.configure(state = tkinter.NORMAL)
+                
+    def exibir_log(self, texto):
+        self.log_box.configure(state = tkinter.NORMAL)
+        self.log_box.insert(tkinter.INSERT, texto)
+        self.log_box.insert(tkinter.INSERT, '\n')
+        self.log_box.configure(state = tkinter.DISABLED)
+        
+    def limpar_log(self):
+        self.log_box.configure(state = tkinter.NORMAL)
+        self.log_box.delete('1.0', tkinter.END)
+        self.log_box.configure(state = tkinter.DISABLED)    
                 
     def gravar_log(self):
         f = open("log.txt", "w")
         f.write(self.log_box.get("1.0", tkinter.END))
         f.close()
         self.exibir_log('Log salvo em ' + os.getcwd() + '\log.txt')
-
-    def print_form_data(self):
-        pass
