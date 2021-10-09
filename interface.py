@@ -153,14 +153,9 @@ class Interface(tkinter.Tk):
             self.escalonar.set(0)
             self.checkbox_escalonar.configure(state = tkinter.DISABLED)
             
-            if not self.index_colunas_deletar:
-                self.button_processar.configure(state = tkinter.DISABLED)
-            else:
-                self.button_processar.configure(state = tkinter.NORMAL)
         else:
             self.checkbox_outliers.configure(state = tkinter.NORMAL)
             self.checkbox_encoder.configure(state = tkinter.NORMAL)
-            self.button_processar.configure(state = tkinter.NORMAL)
             
             if self.tratar_categoricos.get() == 0:
                 self.escalonar.set(0)
