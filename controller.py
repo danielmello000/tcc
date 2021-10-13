@@ -73,12 +73,19 @@ class Controller:
         encoder = TratamentoEncoder()
         tratamento_escala = TratamentoEscala()
         
+        self.enviar_log('\nIniciando processamento do dataset.')
+        
         # dropando colunas
-        self.dataset.drop(self.dataset.columns[self.view.index_colunas_deletar], axis=1, inplace = True)
+        if self.view.index_colunas_deletar:
+            self.enviar_log('\nDeletando features.')
+            self.dataset.drop(self.dataset.columns[self.view.index_colunas_deletar], axis=1, inplace = True)
         
         # dropando linhas e colunas completamente vazias
+        self.enviar_log('\nDeletando registros e features totalmente vazios.')
         try:
             self.dataset = null_imputer.eliminar_totalmente_vazios(self.dataset)
+            self.enviar_log(f'{null_imputer.qt_deleted_rows} registros deletados.')
+            self.enviar_log(f'{null_imputer.qt_deleted_cols} features deletadas.')
         except Exception as e:
             self.enviar_log('\nOcorreu um erro ao eliminar os registros e features totalmente vazios:')
             self.enviar_log(e)
@@ -95,29 +102,44 @@ class Controller:
             df_others = self.dataset[other_columns]
             
             # preenchendo os nulos da parte categórica com a moda
+            self.enviar_log('\nIniciando operação: preenchendo valores nulos categóricos')
             df_cat = df_cat.fillna(df_cat.mode().iloc[0])
+            self.enviar_log('Operação executada.')
              
             # juntando o dataframe com as duas partes
             self.dataset = pd.concat([df_cat, df_others], axis=1)       
     
             # transformando os valores categóricos em numéricos
+            if transformar_categoricos:
+                self.enviar_log('\nIniciando operação: encoder de features categóricas')
+            
             try:
                 self.dataset = encoder.executar_operacao(self.dataset)
+                
+                if transformar_categoricos:
+                    self.enviar_log('Operação executada.')
             except Exception as e:
                 self.enviar_log('\nOcorreu um erro ao efetuar o encoder de valores categóricos:')
                 self.enviar_log(e)
             
             # imputando os valores nulos com o knn imputer
+            self.enviar_log('\nIniciando operação: preenchendo valores nulos numéricos')
             try:
                 self.dataset = null_imputer.executar_operacao(self.dataset)
+                self.enviar_log('Operação executada.')
             except Exception as e:
                 self.enviar_log('\nOcorreu um erro ao imputar valores nulos:')
                 self.enviar_log(e)
                     
             # detectando outliers
             if tratar_outliers:
+                self.enviar_log('\nIniciando operação: tratamento de outliers')
                 try:
-                    self.dataset = delete_outliers.executar_operacao(self.dataset, encoder.ohe_cat_columns, encoder.other_columns)
+                    self.dataset = delete_outliers.executar_operacao(self.dataset, encoder.ohe_cat_columns, 
+                                                                     encoder.other_columns)
+                    self.enviar_log(f'{delete_outliers.qt_outliers} registros identificados como outliers.'  \
+                                    'Estes registros serão deletados')
+                    self.enviar_log('Operação executada.')
                 except Exception as e:
                     self.enviar_log('\nOcorreu um erro no tratamento de outliers:')
                     self.enviar_log(e)
@@ -132,15 +154,24 @@ class Controller:
             
             # normalização (escala de 0 a 1)
             if escalonar:
+                self.enviar_log('\nIniciando operação: escalonamento de atributos.')
                 try:
                     self.dataset = tratamento_escala.executar_operacao(self.dataset)
+                    self.enviar_log('Operação executada.')
                 except Exception as e:
                     self.enviar_log('\nOcorreu um erro ao efetuar o escalonamento:')
                     self.enviar_log(e)
         
-        print('---------- resultado final ---------------')
+        print('--------------- resultado final ---------------')
         print(self.dataset)
-        self.gravar_dataset()
+        
+        self.enviar_log('\nProcessamento executado.')
+        
+        try:
+            self.gravar_dataset()
+        except Exception as e:
+            self.enviar_log('\nOcorreu um erro ao salvar o arquivo:')
+            self.enviar_log(e)
         
         self.dataset = self.original_dataset
         

@@ -35,7 +35,7 @@ class Interface(tkinter.Tk):
         self.checkbox_nulos = ttk.Checkbutton(self.form, text="Preencher valores nulos", variable=self.preencher_nulo, 
                                               command=self.validar_opcoes_tratamento)
         self.checkbox_nulos.grid(row=1, column=0, sticky='ew', pady=(10, 5), padx=(0, 10))
-        self.checkbox_outliers = ttk.Checkbutton(self.form, text="Tratar outliers", variable=self.tratar_outliers)
+        self.checkbox_outliers = ttk.Checkbutton(self.form, text="Deletar outliers", variable=self.tratar_outliers)
         self.checkbox_outliers.grid(row=2, column=0, sticky='ew', pady=5, padx=(0, 10))
         self.checkbox_encoder = ttk.Checkbutton(self.form, text="Converter atributos categóricos", variable=self.tratar_categoricos, 
                                                 command=self.validar_opcoes_tratamento)
@@ -62,7 +62,7 @@ class Interface(tkinter.Tk):
         self.button_limpar = ttk.Button(self.form, text='Limpar', style='info.TButton', command=self.limpar_log)
         self.button_limpar.grid(row=9, column=2, sticky='ew', pady=10, padx=(0, 10))
         
-        self.gravar_log = ttk.Button(self.form, text='Salvar como...', style='info.TButton', command=self.gravar_log)
+        self.gravar_log = ttk.Button(self.form, text='Salvar log', style='info.TButton', command=self.gravar_log)
         self.gravar_log.grid(row=9, column=3, sticky='ew', pady=10, padx=(0, 10))
         
         self.form.pack(fill='both', expand='yes')
@@ -186,4 +186,4 @@ class Interface(tkinter.Tk):
         f = open("log.txt", "w")
         f.write(self.log_box.get("1.0", tkinter.END))
         f.close()
-        self.exibir_log('Log salvo em ' + os.getcwd() + '\log.txt')
+        self.exibir_log('\nLog salvo em ' + os.getcwd() + '\log.txt')

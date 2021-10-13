@@ -48,15 +48,17 @@ class TratamentoOutlier:
             detector.fit(df_others)
             
             previsoes = detector.labels_
-            print('-- previsões outliers ---')
-            print(previsoes)
+            #print('-- previsões outliers ---')
+            #print(previsoes)
             #print(detector.decision_scores_)
             #print(dataset)
             
             # pega os indices dos outliers
             indexes_outliers = [i for i,x in enumerate(previsoes) if x == 1]
-            print("Índices dos registros identificados como outliers: ")
-            print(indexes_outliers)
+            #print("Índices dos registros identificados como outliers: ")
+            #print(indexes_outliers)
+            
+            self.qt_outliers = len(indexes_outliers)
             
             # dropa os outliers
             dataset.drop(indexes_outliers, inplace = True)
