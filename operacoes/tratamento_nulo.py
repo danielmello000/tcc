@@ -14,9 +14,9 @@ class TratamentoNulo:
     
     def eliminar_totalmente_vazios(self, dataset):
         # dropando colunas completamente vazias
-        self.dataset.dropna(how='all', axis=1, inplace=True)
+        dataset.dropna(how='all', axis=1, inplace=True)
         
         # dropando registros que estão completamente vazios
-        self.dataset.dropna(how = 'all', inplace = True)
+        dataset.dropna(how = 'all', inplace = True)
         
         return dataset
