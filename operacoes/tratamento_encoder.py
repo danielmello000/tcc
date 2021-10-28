@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pandas as pd;
 from sklearn.preprocessing import OneHotEncoder
 
@@ -22,7 +20,7 @@ class TratamentoEncoder:
         
         # aplicando one hot encoder na parte categórica e remontando o resultado em um dataframe
         self.ohe = OneHotEncoder(sparse=False)
-        result = self.ohe.fit_transform(df_cat)
+        result = self.ohe.fit_transform(df_cat.astype(str))
         self.ohe_cat_columns = self.ohe.get_feature_names(self.cat_columns)
         df_cat_ohe = pd.DataFrame(result, columns=self.ohe_cat_columns)
         
@@ -39,3 +37,6 @@ class TratamentoEncoder:
         df_cat_reversed = pd.DataFrame(dt_cat_reversed, columns=self.cat_columns)
         reversed_dataset = pd.concat([df_cat_reversed, df_others], axis=1)
         return reversed_dataset
+    
+    
+    

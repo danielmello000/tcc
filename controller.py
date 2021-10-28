@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import os
 import pandas as pd;
 from operacoes import TratamentoNulo, TratamentoOutlier, TratamentoEscala, TratamentoEncoder
@@ -15,6 +13,7 @@ class Controller:
                 self.filename = filename
                 file_extension = filename.split('.').pop()
                 
+                # Verifica a extensão do arquivo e usa o método adequado para leitura
                 if file_extension == 'csv':
                     self.dataset = pd.read_csv(filename)
                 elif file_extension == 'xlsx':
@@ -37,8 +36,7 @@ class Controller:
             except Exception as e:
                 self.enviar_log('\nOcorreu um erro ao ler o arquivo:')
                 self.enviar_log(e)
-                
-    
+                  
     def enviar_log(self, msg):
         self.view.exibir_log(msg)
         

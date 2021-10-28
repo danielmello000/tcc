@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import pandas as pd;
 from sklearn.impute import KNNImputer
 
@@ -24,3 +23,4 @@ class TratamentoNulo:
         self.qt_deleted_rows = qt_rows - len(dataset.index)
         
         return dataset
+
