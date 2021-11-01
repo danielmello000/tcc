@@ -76,7 +76,7 @@ class Controller:
         # dropando colunas
         if self.view.index_colunas_deletar:
             self.enviar_log('\nDeletando features.')
-            self.dataset.drop(self.dataset.columns[self.view.index_colunas_deletar], axis=1, inplace = True)
+            self.dataset = self.dataset.drop(self.dataset.columns[self.view.index_colunas_deletar], axis=1)
         
         # dropando linhas e colunas completamente vazias
         self.enviar_log('\nDeletando registros e features totalmente vazios.')
