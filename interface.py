@@ -98,7 +98,7 @@ class Interface(tkinter.Tk):
         self.filename = filedialog.askopenfilename(initialdir = "/",
                                           title = "Selecione o arquivo",
                                           filetypes = (("Formatos aceitos",
-                                                        ".csv .xlsx"),
+                                                        ".csv .xlsx .data"),
                                                        ("all files",
                                                         "*.*")))
         if(self.filename):

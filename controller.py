@@ -14,7 +14,7 @@ class Controller:
                 file_extension = filename.split('.').pop()
                 
                 # Verifica a extensão do arquivo e usa o método adequado para leitura
-                if file_extension == 'csv':
+                if file_extension == 'csv' or file_extension == 'data':
                     self.dataset = pd.read_csv(filename)
                 elif file_extension == 'xlsx':
                     self.dataset = pd.read_excel(filename)
@@ -133,8 +133,7 @@ class Controller:
             if tratar_outliers:
                 self.enviar_log('\nIniciando operação: tratamento de outliers')
                 try:
-                    self.dataset = delete_outliers.executar_operacao(self.dataset, encoder.ohe_cat_columns, 
-                                                                     encoder.other_columns)
+                    self.dataset = delete_outliers.executar_operacao(self.dataset)
                     self.enviar_log(f'{delete_outliers.qt_outliers} registros identificados como outliers.'  \
                                     'Estes registros serão deletados')
                     self.enviar_log('Operação executada.')
@@ -176,7 +175,8 @@ class Controller:
     def gravar_dataset(self):
         file_extension = self.filename.split('.').pop()
         
-        if file_extension == 'csv':
+        if file_extension == 'csv' or file_extension == 'data':
+            file_extension = 'csv'
             self.dataset.to_csv('processed_dataset.csv', index=False)
         elif file_extension == 'xlsx':
             self.dataset.to_excel('processed_dataset.xlsx', index=False)
