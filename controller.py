@@ -99,26 +99,27 @@ class Controller:
             df_cat = self.dataset[cat_columns]
             df_others = self.dataset[other_columns]
             
-            # preenchendo os nulos da parte categórica com a moda
-            self.enviar_log('\nIniciando operação: preenchendo valores nulos categóricos')
-            df_cat = df_cat.fillna(df_cat.mode().iloc[0])
-            self.enviar_log('Operação executada.')
-             
-            # juntando o dataframe com as duas partes
-            self.dataset = pd.concat([df_cat, df_others], axis=1)       
+            if not df_cat.empty:
+                # preenchendo os nulos da parte categórica com a moda
+                self.enviar_log('\nIniciando operação: preenchendo valores nulos categóricos')
+                df_cat = df_cat.fillna(df_cat.mode().iloc[0])
+                self.enviar_log('Operação executada.')
+                 
+                # juntando o dataframe com as duas partes
+                self.dataset = pd.concat([df_cat, df_others], axis=1)       
     
-            # transformando os valores categóricos em numéricos
-            if transformar_categoricos:
-                self.enviar_log('\nIniciando operação: encoder de features categóricas')
-            
-            try:
-                self.dataset = encoder.executar_operacao(self.dataset)
-                
+                # transformando os valores categóricos em numéricos
                 if transformar_categoricos:
-                    self.enviar_log('Operação executada.')
-            except Exception as e:
-                self.enviar_log('\nOcorreu um erro ao efetuar o encoder de valores categóricos:')
-                self.enviar_log(e)
+                    self.enviar_log('\nIniciando operação: encoder de features categóricas')
+                
+                try:
+                    self.dataset = encoder.executar_operacao(self.dataset)
+                    
+                    if transformar_categoricos:
+                        self.enviar_log('Operação executada.')
+                except Exception as e:
+                    self.enviar_log('\nOcorreu um erro ao efetuar o encoder de valores categóricos:')
+                    self.enviar_log(e)
             
             # imputando os valores nulos com o knn imputer
             self.enviar_log('\nIniciando operação: preenchendo valores nulos numéricos')
@@ -142,7 +143,7 @@ class Controller:
                     self.enviar_log(e)
             
             #revertendo o one hot encoder caso necessário
-            if not transformar_categoricos:
+            if not transformar_categoricos and not df_cat.empty:
                 try:
                     self.dataset = encoder.desfazer_operacao(self.dataset)
                 except Exception as e:
