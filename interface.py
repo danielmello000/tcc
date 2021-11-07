@@ -97,8 +97,8 @@ class Interface(tkinter.Tk):
     def procurar_dataset(self):
         self.filename = filedialog.askopenfilename(initialdir = "/",
                                           title = "Selecione o arquivo",
-                                          filetypes = (("Formatos aceitos",
-                                                        ".csv .xlsx .data"),
+                                          filetypes = ((".csv, .xlsx",
+                                                        ".csv .xlsx"),
                                                        ("all files",
                                                         "*.*")))
         if(self.filename):

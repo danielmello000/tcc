@@ -14,7 +14,7 @@ class Controller:
                 file_extension = filename.split('.').pop()
                 
                 # Verifica a extensão do arquivo e usa o método adequado para leitura
-                if file_extension == 'csv' or file_extension == 'data':
+                if file_extension == 'csv':
                     self.dataset = pd.read_csv(filename)
                 elif file_extension == 'xlsx':
                     self.dataset = pd.read_excel(filename)
@@ -64,8 +64,6 @@ class Controller:
 
     def processar_dataset(self, tratar_nulos, tratar_outliers, transformar_categoricos, escalonar):
         
-        # instanciando os objetos das operações
-        
         null_imputer = TratamentoNulo()
         delete_outliers = TratamentoOutlier()
         encoder = TratamentoEncoder()
@@ -90,14 +88,18 @@ class Controller:
         
         if tratar_nulos:    # Obrigatório para as demais operações
         
-            # pegando os nomes das colunas categóricas e numéricas
+            # pegando os nomes das colunas categóricas, numéricas e inteiras
             datatype = self.dataset.dtypes
             cat_columns = datatype[(datatype == 'object') | (datatype == 'category')].index.tolist()
-            other_columns = datatype[(datatype != 'object') & (datatype != 'category')].index.tolist()
+            num_columns = datatype[(datatype != 'object') & (datatype != 'category')].index.tolist()
+            int_columns = []
+            for col in num_columns:
+                if (self.dataset[col].fillna(-9999) % 1  == 0).all():
+                    int_columns.append(col)
             
             # dividindo o dataframe entre features categóricas e numericas
             df_cat = self.dataset[cat_columns]
-            df_others = self.dataset[other_columns]
+            df_others = self.dataset[num_columns]
             
             if not df_cat.empty:
                 # preenchendo os nulos da parte categórica com a moda
@@ -129,6 +131,10 @@ class Controller:
             except Exception as e:
                 self.enviar_log('\nOcorreu um erro ao imputar valores nulos:')
                 self.enviar_log(e)
+                
+            # arredondando as colunas do tipo inteiro
+            for col in int_columns:
+                self.dataset[col] = self.dataset[col].round(0)
                     
             # detectando outliers
             if tratar_outliers:
@@ -142,14 +148,14 @@ class Controller:
                     self.enviar_log('\nOcorreu um erro no tratamento de outliers:')
                     self.enviar_log(e)
             
-            #revertendo o one hot encoder caso necessário
+            # revertendo o one hot encoder caso necessário
             if not transformar_categoricos and not df_cat.empty:
                 try:
                     self.dataset = encoder.desfazer_operacao(self.dataset)
                 except Exception as e:
                     self.enviar_log('\nOcorreu um erro ao desfazer o encoder de valores categóricos:')
                     self.enviar_log(e)
-            
+
             # normalização (escala de 0 a 1)
             if escalonar:
                 self.enviar_log('\nIniciando operação: escalonamento de atributos.')
@@ -175,12 +181,9 @@ class Controller:
         
     def gravar_dataset(self):
         file_extension = self.filename.split('.').pop()
-        
-        if file_extension == 'csv' or file_extension == 'data':
-            file_extension = 'csv'
-            self.dataset.to_csv('processed_dataset.csv', index=False)
-        elif file_extension == 'xlsx':
-            self.dataset.to_excel('processed_dataset.xlsx', index=False)
+
+        self.dataset.to_csv('processed_dataset.csv', index=False)
+        self.dataset.to_excel('processed_dataset.xlsx', index=False)
             
         self.enviar_log('\nArquivo salvo em ' + os.getcwd() + '\processed_dataset.' + file_extension)
         
